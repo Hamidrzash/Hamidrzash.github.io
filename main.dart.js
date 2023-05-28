@@ -49653,15 +49653,15 @@ r=b.W(j).f
 q=A.ah(102,0,0,0)
 r=A.e6(k,A.oM(A.a3S(l.D5(l.d,b.W(j).f.a.a<500)),k,k),q,k,s.a.b,k,k,r.a.a)
 j=r}return new A.rr(A.e6(k,j,k,B.tk,i.a.b,k,k,h.a.a),k)},
-Ck(a){var s,r,q,p,o,n,m=this,l="assets/images/HamidCut.jpg",k=null,j="SourceSans",i="I'm Hamid, an mobile app developer who loves  coding with \nflutter framework and dart. I have eight month of experience \nand currently looking for an internship job",h=t.E,g=t.wy,f=t.Ab,e=t.Et
+Ck(a){var s,r,q,p,o,n,m=this,l="assets/images/HamidCut.jpg",k=null,j="SourceSans",i="I'm Hamid, a mobile app developer who loves creating mobile\napps using Flutter and Dart. I have almost 2 years of experience. \nI've worked on fintech and chat apps.\nLet me know if you have any questions or need help with anything!",h=t.E,g=t.wy,f=t.Ab,e=t.Et
 if(!a){s=A.xF(new A.dt(B.vd,A.a2c(A.oy(100),A.rO(A.a2F(l,B.bG),200,200)),k))
-r=A.j8("HELLO",A.dW(k,k,k,k,k,k,k,k,j,k,k,40,k,B.aO,k,k,!0,k,k,k,k,k,k,k,k),k,k)
+r=A.j8("Hey there!",A.dW(k,k,k,k,k,k,k,k,j,k,k,40,k,B.aO,k,k,!0,k,k,k,k,k,k,k,k),k,k)
 q=A.e6(k,k,B.j,k,2,k,k,121)
 p=A.j8(i,A.a33(),k,k)
 o=A.j8("ABOUT",A.dW(k,k,B.j,k,k,k,k,k,k,k,k,20,k,k,k,k,!0,k,1.1,k,k,k,k,k,k),k,k)
 n=B.d.ah(25.5)
 h=A.rq(A.b([s,A.xF(A.J2(A.b([r,new A.dt(B.ko,q,k),p,new A.dt(B.kn,A.rq(A.b([A.Tp(o,new A.VI(m),A.oJ(k,k,k,k,k,k,k,k,k,k,new A.bc(A.ah(n,158,158,158),g),new A.bc(B.cF,f),k,new A.bc(B.dj,e),k,k,k,k,k,k)),B.rp,A.Tp(A.j8("WORK",A.dW(k,k,B.j,k,k,k,k,k,k,k,k,20,k,k,k,k,!0,k,1.1,k,k,k,k,k,k),k,k),new A.VJ(m),A.oJ(k,k,k,k,k,k,k,k,k,k,new A.bc(A.ah(n,158,158,158),g),new A.bc(B.cF,f),k,new A.bc(B.dj,e),k,k,k,k,k,k))],h),B.az,B.bm,B.c3),k)],h),B.cC,B.bn))],h),B.az,B.bm,B.bn)}else{s=A.rq(A.b([A.xF(new A.dt(B.vc,A.a2c(A.oy(100),A.rO(A.a2F(l,B.bG),200,200)),k))],h),B.az,B.bm,B.c3)
-r=A.j8("HELLO",A.dW(k,k,k,k,k,k,k,k,j,k,k,40,k,B.aO,k,k,!0,k,k,k,k,k,k,k,k),k,k)
+r=A.j8("Hey there!",A.dW(k,k,k,k,k,k,k,k,j,k,k,40,k,B.aO,k,k,!0,k,k,k,k,k,k,k,k),k,k)
 q=A.e6(k,k,B.j,k,2,k,k,121)
 p=A.j8(i,A.a33(),k,k)
 o=A.j8("ABOUT",A.dW(k,k,B.j,k,k,k,k,k,k,k,k,20,k,k,k,k,!0,k,1.1,k,k,k,k,k,k),k,k)
