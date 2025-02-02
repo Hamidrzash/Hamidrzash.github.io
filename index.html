@@ -1,120 +1,390 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-  <!--
-    If you are serving your web app in a path other than the root, change the
-    href value below to reflect the base path you are serving from.
-
-    The path provided below has to start and end with a slash "/" in order for
-    it to work correctly.
-
-    For more details:
-    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
-
-    This is a placeholder for base href that will be replaced by the value of
-    the `--base-href` argument provided to `flutter build`.
-  -->
-  <base href="/">
-
-  <meta charset="UTF-8">
-  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
-
-  <!-- iOS meta tags & icons -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="webresume">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
-
-  <title>webresume</title>
-  <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="description"
+    content="Hamid reza Shakeri - Flutter Developer with more than three years of experience. Find my portfolio and social links here." />
+  <meta name="keywords" content="Hamid reza Shakeri, Flutter Developer, Portfolio, GitHub, LinkedIn" />
+  <meta name="author" content="Hamid reza Shakeri" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hamid reza Shakeri - Flutter Developer</title>
   <style>
-      .container {
-        width: 100vw;
-        height: 100vh;
-        display: flex; /* Default Axis is X*/
-        justify-content: center; /* Main Axis */
-        align-items: center; /* Cross Axis */
+    /* Reset and basic styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #ffffff;
+    }
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Centered resume content */
+    .resume-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      padding: 1.5rem;
+      background: rgba(0, 0, 0, 0.65);
+      border-radius: 8px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .resume-container img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 50%;
+      background-color: #FFFFFF00;
+      margin-bottom: 1rem;
+    }
+
+    .resume-container h1 {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .resume-container p {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .social-links a {
+      color: #ffffff;
+      text-decoration: none;
+      margin: 0 0.5rem;
+      font-size: 1.2rem;
+      transition: color 0.2s;
+    }
+
+    .social-links a:hover {
+      color: #ffcc00;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .resume-container {
+        padding: 1rem;
       }
-      .indicator{
-        width: 10vw;
+
+      .resume-container img {
+        width: 90px;
+        height: 90px;
+        margin-bottom: 0.75rem;
       }
-</style>
+
+      .resume-container h1 {
+        font-size: 1.5rem;
+      }
+
+      .resume-container p {
+        font-size: 0.9rem;
+      }
+
+      .social-links a {
+        font-size: 1rem;
+        margin: 0 0.3rem;
+      }
+    }
+  </style>
 </head>
+
 <body>
-<div id="loading_indicator" class="container">
-  <img class="indicator" src="./assets/index.svg" />
-</div>
+  <!-- WebGL Canvas for the shader background -->
+  <canvas id="glCanvas"></canvas>
 
-  <!-- This script installs service_worker.js to provide PWA functionality to
-       application. For more information, see:
-       https://developers.google.com/web/fundamentals/primers/service-workers -->
+  <!-- Resume UI overlay -->
+  <div class="resume-container">
+    <img src="/assets/Hamid.jpg" alt="Hamid reza Shakeri" />
+    <h1>Hamid reza Shakeri</h1>
+    <p>Flutter developer with more than three years of experience</p>
+    <div class="social-links">
+      <a href="https://github.com/yourgithub" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://linkedin.com/in/yourlinkedin" target="_blank" rel="noopener">LinkedIn</a>
+      <!-- Add more social links as needed -->
+    </div>
+  </div>
+
   <script>
-    var serviceWorkerVersion = '2214576915';
-    var scriptLoaded = false;
-    function loadMainDartJs() {
-      if (scriptLoaded) {
-        return;
+    const canvas = document.getElementById("glCanvas");
+    const gl = canvas.getContext("webgl2");
+    if (!gl) {
+      alert("WebGL2 is not supported on your browser.");
+    }
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    // Track mouse position (in Shadertoy, iMouse.xy is current pos, iMouse.zw are click positions)
+    let iMouse = [canvas.width / 2, canvas.height / 2, 0, 0];
+    window.addEventListener('mousedown', (e) => {
+      iMouse[2] = e.clientX;
+      iMouse[3] = canvas.height - e.clientY;
+    });
+    window.addEventListener('mouseup', (e) => {
+      // When mouse is released, reset click positions.
+      iMouse[2] = 0;
+      iMouse[3] = 0;
+    });
+
+    // Vertex shader (shared by both passes)
+    const vertexShaderSource = `#version 300 es
+      precision highp float;
+      in vec2 a_position;
+      out vec2 v_uv;
+      void main() {
+        v_uv = a_position * 0.5 + 0.5;
+        gl_Position = vec4(a_position, 0.0, 1.0);
       }
-      scriptLoaded = true;
-      var scriptTag = document.createElement('script');
-      scriptTag.src = 'main.dart.js';
-      scriptTag.type = 'application/javascript';
-      document.body.append(scriptTag);
-    }
+    `;
 
-    if ('serviceWorker' in navigator) {
-      // Service workers are supported. Use them.
-      window.addEventListener('load', function () {
-        // Wait for registration to finish before dropping the <script> tag.
-        // Otherwise, the browser will load the script multiple times,
-        // potentially different versions.
-        var serviceWorkerUrl = 'flutter_service_worker.js?v=' + serviceWorkerVersion;
-        navigator.serviceWorker.register(serviceWorkerUrl)
-          .then((reg) => {
-            function waitForActivation(serviceWorker) {
-              serviceWorker.addEventListener('statechange', () => {
-                if (serviceWorker.state == 'activated') {
-                  console.log('Installed new service worker.');
-                  loadMainDartJs();
-                }
-              });
-            }
-            if (!reg.active && (reg.installing || reg.waiting)) {
-              // No active web worker and we have installed or are installing
-              // one for the first time. Simply wait for it to activate.
-              waitForActivation(reg.installing || reg.waiting);
-            } else if (!reg.active.scriptURL.endsWith(serviceWorkerVersion)) {
-              // When the app updates the serviceWorkerVersion changes, so we
-              // need to ask the service worker to update.
-              console.log('New service worker available.');
-              reg.update();
-              waitForActivation(reg.installing);
-            } else {
-              // Existing service worker is still good.
-              console.log('Loading app from service worker.');
-              loadMainDartJs();
-            }
-          });
-
-        // If service worker doesn't succeed in a reasonable amount of time,
-        // fallback to plaint <script> tag.
-        setTimeout(() => {
-          if (!scriptLoaded) {
-            console.warn(
-              'Failed to load app from service worker. Falling back to plain <script> tag.',
-            );
-            loadMainDartJs();
+    // Background (animated) fragment shader
+    const backgroundShaderSource = `#version 300 es
+      precision highp float;
+      uniform float iTime;
+      uniform vec2 iResolution;
+      out vec4 fragColor;
+      
+      const int iterationTime1 = 20;
+      const float scale = 6.0;
+      const int iterationTime2 = 1;
+      const float velocity_x = 0.1;
+      const float velocity_y = 0.2;
+      const float mode_2_speed = 2.5;
+      const float mode_1_detail = 200.0;
+      const float mode_1_twist = 50.0;
+      
+      float f(in vec2 p) {
+          return sin(p.x + sin(p.y + iTime * velocity_x)) * sin(p.y * p.x * 0.1 + iTime * velocity_y);
+      }
+      
+      vec2 vel;
+      vec2 pos;
+      
+      void field(in vec2 p, in int mode) {
+          vec2 ep = vec2(0.05, 0.0);
+          vec2 rz = vec2(0.0);
+          for (int i = 0; i < iterationTime1; i++) {
+              float t0 = f(p);
+              float t1 = f(p + ep.xy);
+              float t2 = f(p + ep.yx);
+              vec2 g = vec2((t1 - t0), (t2 - t0)) / ep.x;
+              vec2 t = vec2(-g.y, g.x);
+              p += (mode_1_twist * 0.01) * t + g * (1.0 / mode_1_detail);
+              p.x += sin(iTime * mode_2_speed / 10.0) / 10.0;
+              p.y += cos(iTime * mode_2_speed / 10.0) / 10.0;
+              rz = g;
           }
-        }, 4000);
-      });
-    } else {
-      // Service workers not supported. Just drop the <script> tag.
-      loadMainDartJs();
+          vel = rz;
+          for (int i = 1; i < iterationTime2; i++) {
+              p.x += 0.3 / float(i) * sin(float(i) * 3.0 * p.y + iTime * mode_2_speed) + 0.5;
+              p.y += 0.3 / float(i) * cos(float(i) * 3.0 * p.x + iTime * mode_2_speed) + 0.5;
+          }
+          pos = p;
+      }
+      
+      vec3 getRGB(in int mode) {
+          vec2 p = pos;
+          float r = cos(p.x + p.y + 1.0) * 0.5 + 0.5;
+          float g = sin(p.x + p.y + 1.0) * 0.5 + 0.5;
+          float b = (sin(p.x + p.y) + cos(p.x + p.y)) * 0.3 + 0.5;
+          return vec3(r, g, b);
+      }
+      
+      void mainImage(in vec2 fragCoord) {
+          vec2 p = fragCoord / iResolution - 0.5;
+          p.x *= iResolution.x / iResolution.y;
+          p *= scale;
+          field(p, 1);
+          vec3 col = getRGB(1) * 0.85;
+          fragColor = vec4(col, 1.0);
+      }
+      
+      void main() {
+          mainImage(gl_FragCoord.xy);
+      }
+    `;
+
+    // ASCII fragment shader
+    const asciiShaderSource = `#version 300 es
+      precision highp float;
+      uniform float iTime;
+      uniform vec2 iResolution;
+      uniform vec4 iMouse;
+      uniform sampler2D iChannel0;
+      out vec4 fragColor;
+      
+      float character(int n, vec2 p) {
+          p = floor(p * vec2(-4.0, 4.0) + 2.5);
+          if (clamp(p.x, 0.0, 4.0) == p.x) {
+              if (clamp(p.y, 0.0, 4.0) == p.y) {
+                  int a = int(round(p.x) + 5.0 * round(p.y));
+                  if (mod(float(n) / exp2(float(a)), 2.0) > 0.9) return 1.0;
+              }
+          }
+          return 0.0;
+      }
+      
+      void mainImage(in vec2 fragCoord) {
+          vec2 pix = fragCoord;
+          vec3 col = texture(iChannel0, floor(pix / 8.0) * 8.0 / iResolution).rgb;
+          float gray = 0.3 * col.r + 0.59 * col.g + 0.11 * col.b;
+          int n = 4096;
+          if (gray > 0.2) n = 65600;
+          if (gray > 0.3) n = 163153;
+          if (gray > 0.4) n = 15255086;
+          if (gray > 0.5) n = 13121101;
+          if (gray > 0.6) n = 15252014;
+          if (gray > 0.7) n = 13195790;
+          if (gray > 0.8) n = 11512810;
+          vec2 p = mod(pix / 4.0, 2.0) - vec2(1.0);
+          // Use the mouse's x-coordinate (iMouse.x) to influence the effect intensity
+          float effect = mix(0.5, 1.5, iMouse.x / iResolution.x);
+          if (iMouse.z > 0.5)
+              col = vec3(character(n, p) * effect);
+          else
+              col = col * character(n, p) * effect;
+          fragColor = vec4(col, 1.0);
+      }
+      
+      void main() {
+          mainImage(gl_FragCoord.xy);
+      }
+    `;
+
+    // Utility: compile shader
+    function compileShader(gl, type, source) {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error("Shader compile failed:", gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+      }
+      return shader;
     }
+
+    // Utility: create program
+    function createProgram(gl, vSource, fSource) {
+      const vertexShader = compileShader(gl, gl.VERTEX_SHADER, vSource);
+      const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fSource);
+      const program = gl.createProgram();
+      gl.attachShader(program, vertexShader);
+      gl.attachShader(program, fragmentShader);
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        console.error("Program link failed:", gl.getProgramInfoLog(program));
+        return null;
+      }
+      return program;
+    }
+
+    // Create shader programs
+    const program1 = createProgram(gl, vertexShaderSource, backgroundShaderSource);
+    const program2 = createProgram(gl, vertexShaderSource, asciiShaderSource);
+
+    // Create full-screen quad buffer
+    const quadVerts = new Float32Array([
+      -1, -1,
+      1, -1,
+      -1, 1,
+      -1, 1,
+      1, -1,
+      1, 1,
+    ]);
+    const vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    const vbo = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+    gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
+    const posLoc1 = gl.getAttribLocation(program1, "a_position");
+    gl.enableVertexAttribArray(posLoc1);
+    gl.vertexAttribPointer(posLoc1, 2, gl.FLOAT, false, 0, 0);
+    // Both programs use the same attribute name
+
+    // Offscreen framebuffer for background shader
+    const fbWidth = canvas.width;
+    const fbHeight = canvas.height;
+    const offscreenTexture = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, offscreenTexture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, fbWidth, fbHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    const offscreenFBO = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, offscreenFBO);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, offscreenTexture, 0);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    // Get uniform locations for program1 (background)
+    const iResolutionLoc1 = gl.getUniformLocation(program1, "iResolution");
+    const iTimeLoc1 = gl.getUniformLocation(program1, "iTime");
+
+    // Get uniform locations for program2 (ASCII)
+    const iResolutionLoc2 = gl.getUniformLocation(program2, "iResolution");
+    const iTimeLoc2 = gl.getUniformLocation(program2, "iTime");
+    const iMouseLoc2 = gl.getUniformLocation(program2, "iMouse");
+    const iChannel0Loc2 = gl.getUniformLocation(program2, "iChannel0");
+
+    // Render loop: two passes (background and then ASCII overlay)
+    function render(time) {
+      const t = time * 0.0001;
+
+      // Pass 1: render background shader to offscreen framebuffer
+      gl.bindFramebuffer(gl.FRAMEBUFFER, offscreenFBO);
+      gl.viewport(0, 0, fbWidth, fbHeight);
+      gl.clearColor(0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.useProgram(program1);
+      gl.uniform2f(iResolutionLoc1, fbWidth, fbHeight);
+      gl.uniform1f(iTimeLoc1, t);
+      gl.bindVertexArray(vao);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      // Pass 2: render ASCII shader to the default framebuffer using offscreen texture
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      gl.clearColor(0, 0, 0, 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.useProgram(program2);
+      gl.uniform2f(iResolutionLoc2, canvas.width, canvas.height);
+      gl.uniform1f(iTimeLoc2, t);
+      // Pass updated mouse coordinates
+      gl.uniform4f(iMouseLoc2, iMouse[0], iMouse[1], iMouse[2], iMouse[3]);
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, offscreenTexture);
+      gl.uniform1i(iChannel0Loc2, 0);
+      gl.bindVertexArray(vao);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      requestAnimationFrame(render);
+    }
+    requestAnimationFrame(render);
   </script>
 </body>
+
 </html>
