@@ -51,13 +51,13 @@
       width: 90%;
     }
 
-    .resume-container img {
+    /* .resume-container img {
       width: 120px;
       height: 120px;
       object-fit: cover;
       border-radius: 50%;
       margin-bottom: 1rem;
-    }
+    } */
 
     .resume-container h1 {
       font-size: 2rem;
@@ -87,11 +87,11 @@
         padding: 1rem;
       }
 
-      .resume-container img {
+      /* .resume-container img {
         width: 90px;
         height: 90px;
         margin-bottom: 0.75rem;
-      }
+      } */
 
       .resume-container h1 {
         font-size: 1.5rem;
@@ -115,7 +115,7 @@
 
   <!-- Resume UI overlay -->
   <div class="resume-container">
-    <img src="/assets/Hamid.jpg" alt="Hamid reza Shakeri" />
+    <!-- <img src="/assets/Hamid.jpg" alt="Hamid reza Shakeri" /> -->
     <h1>Hamid reza Shakeri</h1>
     <p>Flutter developer with more than three years of experience</p>
     <div class="social-links">
@@ -429,7 +429,7 @@
 
       // --- Pass 1: render background shader to offscreen framebuffer ---
       gl.bindFramebuffer(gl.FRAMEBUFFER, offscreenFBO);
-      gl.viewport(0, 0, fbWidth, fbHeight);
+      gl.viewport(0, 0, 1920, 1080);
       gl.clearColor(0, 0, 0, 1);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program1);
