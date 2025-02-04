@@ -17,19 +17,16 @@
       padding: 0;
       box-sizing: border-box;
     }
-
     html,
     body {
       width: 100%;
       height: 100%;
       overflow: hidden;
     }
-
     body {
       font-family: 'Montserrat', sans-serif;
       color: #ffffff;
     }
-
     canvas {
       position: absolute;
       top: 0;
@@ -37,7 +34,6 @@
       width: 100%;
       height: 100%;
     }
-
     /* Centered resume content */
     .resume-container {
       position: absolute;
@@ -50,25 +46,14 @@
       max-width: 500px;
       width: 90%;
     }
-
-    /* .resume-container img {
-      width: 120px;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 50%;
-      margin-bottom: 1rem;
-    } */
-
     .resume-container h1 {
       font-size: 2rem;
       margin-bottom: 0.5rem;
     }
-
     .resume-container p {
       font-size: 1rem;
       margin-bottom: 1rem;
     }
-
     .social-links a {
       color: #ffffff;
       text-decoration: none;
@@ -76,31 +61,20 @@
       font-size: 1.2rem;
       transition: color 0.2s;
     }
-
     .social-links a:hover {
-      color: #6e62ee;
+      color: #3d4dc2;
     }
-
     /* Responsive adjustments */
     @media (max-width: 480px) {
       .resume-container {
         padding: 1rem;
       }
-
-      /* .resume-container img {
-        width: 90px;
-        height: 90px;
-        margin-bottom: 0.75rem;
-      } */
-
       .resume-container h1 {
         font-size: 1.5rem;
       }
-
       .resume-container p {
         font-size: 0.9rem;
       }
-
       .social-links a {
         font-size: 1rem;
         margin: 0 0.3rem;
@@ -112,43 +86,39 @@
 <body>
   <!-- WebGL Canvas for the shader background -->
   <canvas id="glCanvas"></canvas>
-
+  
   <!-- Resume UI overlay -->
   <div class="resume-container">
-    <!-- <img src="/assets/Hamid.jpg" alt="Hamid reza Shakeri" /> -->
     <h1>Hamid reza Shakeri</h1>
     <p>Flutter developer with more than three years of experience</p>
     <div class="social-links">
-      <a href="https://github.com/Hamidrzash" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://www.linkedin.com/in/hamidrezashakeri" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/yourgithub" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://linkedin.com/in/yourlinkedin" target="_blank" rel="noopener">LinkedIn</a>
       <!-- Add more social links as needed -->
     </div>
   </div>
-
+  
   <script>
     const canvas = document.getElementById("glCanvas");
     const gl = canvas.getContext("webgl2");
     if (!gl) {
       alert("WebGL2 is not supported on your browser.");
     }
+    
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     }
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
-
-    // --- NEW: Track mouse position ---
-    // Initialize mouse position (in pixels)
-    let mousePos = { x: canvas.width / 2, y: canvas.height / 2 };
+    
+    // Track mouse position (normalized, origin bottom-left)
+    let iMouse = [canvas.width / 2, canvas.height / 2];
     window.addEventListener("mousemove", (e) => {
-      // Update mouse position relative to canvas
-      const rect = canvas.getBoundingClientRect();
-      mousePos.x = e.clientX - rect.left;
-      mousePos.y = rect.height - (e.clientY - rect.top); // flip y-axis for WebGL
+      // Flip Y to match WebGL coordinates
+      iMouse = [e.clientX, canvas.height - e.clientY];
     });
-    // ----------------------------------
-
+    
     // Vertex shader (shared by both passes)
     const vertexShaderSource = `#version 300 es
       precision highp float;
@@ -159,155 +129,62 @@
         gl_Position = vec4(a_position, 0.0, 1.0);
       }
     `;
-
-    // --- Modified Background Shader ---
-    // Added uniform vec2 iMouse to receive mouse coordinates.
+    
+    // Background shader (Program1)
+    // To test a different background shader, simply replace the code below.
     const backgroundShaderSource = `#version 300 es
+
       precision highp float;
       uniform float iTime;
       uniform vec2 iResolution;
-      uniform vec2 iMouse; // NEW: mouse position in pixels
+      uniform vec2 iMouse;
       out vec4 fragColor;
       
-      // Original made by nimitz 2017 (twitter: @stormoid)
-      // License Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License
-      // Contact the author for other licensing options
-      // This is a modified purple version
-      
+      // Modified purple version by nimitz 2017
       #define time iTime
       
-      mat2 mm2(in float a){float c = cos(a), s = sin(a); return mat2(c,s,-s,c);}
-      mat2 m2 = mat2(0.95534, 0.29552, -0.29552, 0.95534);
-      float tri(in float x){return clamp(abs(fract(x)-.5),0.01,0.49);}
-      vec2 tri2(in vec2 p){return vec2(tri(p.x)+tri(p.y), tri(p.y+tri(p.x)));}
-      
-      float triNoise2d(in vec2 p, float spd)
-      {
-          float z = 1.8;
-          float z2 = 1.1;
-          float rz = 0.;
-          p *= mm2(p.x * 0.06);
-          vec2 bp = p;
-          for (float i = 0.; i < 5.; i++)
-          {
-              vec2 dg = tri2(bp * 1.85) * 0.75;
-              dg *= mm2(time * spd);
-              p -= dg / z2;
-      
-              bp *= 1.3;
-              z2 *= 0.45;
-              z *= 0.42;
-              p *= 1.21 + (rz - 1.0) * 0.02;
-      
-              rz += tri(p.x + tri(p.y)) * z;
-              p *= -m2;
-          }
-          return clamp(1.0 / pow(rz * 29.0, 1.3), 0.0, 0.55);
-      }
-      
-      float hash21(in vec2 n){ 
-          return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453); 
-      }
-      
-      vec4 aurora(vec3 ro, vec3 rd)
-      {
-          vec4 col = vec4(0.);
-          vec4 avgCol = vec4(0.);
-          for(float i = 0.; i < 50.; i++)
-          {
-              float of = 0.006 * hash21(gl_FragCoord.xy) * smoothstep(0., 15., i);
-              float pt = ((0.8 + pow(i, 1.4) * 0.002) - ro.y) / (rd.y * 2. + 0.4);
-              pt -= of;
-              vec3 bpos = ro + pt * rd;
-              vec2 p = bpos.zx;
-              float rzt = triNoise2d(p, 0.06);
-              vec4 col2 = vec4(0, 0, 0, rzt);
-              col2.rgb = (sin(2. - vec3(-10, -0.7, 1.3) + i * 0.03) * 0.5 + 0.5) * rzt;
-              avgCol = mix(avgCol, col2, 0.5);
-              col += avgCol * exp2(-i * 0.065 - 2.5) * smoothstep(0.7, 5., i);
-          }
-          col *= clamp(rd.y * 17. + 0.4, 0., 1.);
-          return col * 1.8;
-      }
-      
-      // Background and Stars
-      
-      vec3 nmzHash33(vec3 q)
-      {
-          uvec3 p = uvec3(ivec3(q));
-          p = p * uvec3(374761393U, 1103515245U, 668265263U) + p.zxy + p.yzx;
-          p = p.yzx * (p.zxy ^ (p >> 3U));
-          return vec3(p ^ (p >> 16U)) * (1.0 / vec3(0xffffffffU));
-      }
-      
-      vec3 stars(in vec3 p)
-      {
-          vec3 c = vec3(0.);
-          float res = iResolution.x * 1.;
-          for (float i = 0.; i < 4.; i++)
-          {
-              vec3 q = fract(p * (0.15 * res)) - 0.5;
-              vec3 id = floor(p * (0.15 * res));
-              vec2 rn = nmzHash33(id).xy;
-              float c2 = 1. - smoothstep(0., 0.6, length(q));
-              c2 *= step(rn.x, 0.0005 + i * i * 0.001);
-              c += c2 * (mix(vec3(1.0, 0.49, 0.1), vec3(0.75, 0.9, 1.0), rn.y) * 0.1 + 0.9);
-              p *= 1.3;
-          }
-          return c * c * 0.8;
-      }
-      
-      vec3 bg(in vec3 rd)
-      {
-          float sd = dot(normalize(vec3(-0.5, -0.6, 0.9)), rd) * 0.5 + 0.5;
-          sd = pow(sd, 5.);
-          vec3 col = mix(vec3(0.1, 0.1, 0.2), vec3(0.1, 0.05, 0.2), sd);
-          return col * 0.63;
-      }
-      
-      void mainImage(out vec4 fragColor, in vec2 fragCoord)
-      {
-          vec2 q = fragCoord.xy / iResolution.xy;
-          vec2 p = q - 0.5;
-          p.x *= iResolution.x / iResolution.y;
-      
-          vec3 ro = vec3(0, 0, -6.7);
-          vec3 rd = normalize(vec3(p, 1.3));
-          vec2 mo = iResolution.xy + 1.4;
-          mo = (mo == vec2(-0.5)) ? mo = vec2(-0.1, 0.1) : mo;
-          mo.x *= iResolution.x / iResolution.y;
-          rd.yz *= mm2(mo.y);
-      
-          vec3 col = vec3(0.);
-          vec3 brd = rd;
-          float fade = smoothstep(0., 0.01, abs(brd.y)) * 0.1 + 0.9;
-      
-          col = bg(rd) * fade;
-      
-          if (rd.y > 0.) {
-              vec4 aur = smoothstep(0., 1.5, aurora(ro, rd)) * fade;
-              col += stars(rd);
-              col = col * (1. - aur.a) + aur.rgb;
-          }
-      
-          // --- NEW: Add cursor-following ripple effect ---
-          vec2 uv = fragCoord.xy / iResolution.xy;
-          vec2 mPos = iMouse / iResolution; // Convert mouse (pixel) coordinates to normalized coords
-          float dist = distance(uv, mPos);
-          // Create a ripple: fast oscillation damped by distance
-          float ripple = exp(-dist * 20.0);
-          // Mix in a purple tint (adjust the color and strength as desired)
-          col += vec3(0.2, 0.0, 0.3) * ripple;
-      
-          fragColor = vec4(col, 1.);
-      }
+      void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{   
+    float speed = .1;
+    float scale = 0.002;
+    vec2 p = fragCoord * scale;   
+    
+    // Keep the warping effect the same
+    for(int i=1; i<10; i++){
+        p.x+=0.3/float(i)*sin(float(i)*3.*p.y+iTime*speed)+650.0/9000.;
+        p.y+=0.3/float(i)*cos(float(i)*3.*p.x+iTime*speed)+650.0/9000.;
+    }
+    
+    // Modified color calculation for black and purple
+    float pattern = (sin(p.x+p.y)+cos(p.x+p.y))*.5+.5;
+    
+    vec3 purple = vec3(61.0/255.0, 77.0/255.0, 194.0/255.0);
+    vec3 black = vec3(19.0/255.0, 18.0/255.0, 44.0/255.0);
+    vec3 lightBlue = vec3(61.0/255.0, 77.0/255.0, 194.0/255.0); // Light blue color for the glow
+    
+    // Calculate distance from current pixel to mouse position
+    float dist = length(fragCoord - iMouse.xy);
+    
+    // Create a circular falloff for the light
+    float radius = 1.0; // Size of the light circle
+    float softness = 150.0; // How soft the light edge is
+    float lightIntensity = smoothstep(radius + softness, radius - softness, dist) * 0.15;
+    
+    // Mix between black and purple based on the pattern
+    vec3 baseColor = mix(black, purple, pattern);
+    
+    // Add the light blue glow around mouse
+    vec3 finalColor = mix(baseColor, lightBlue, lightIntensity);
+    
+    fragColor = vec4(finalColor, 1.0);
+}
       
       void main() {
           mainImage(fragColor, gl_FragCoord.xy);
       }
     `;
-
-    // ASCII fragment shader (unchanged)
+    
+    // ASCII shader (unchanged)
     const asciiShaderSource = `#version 300 es
       precision highp float;
       uniform float iTime;
@@ -329,15 +206,15 @@
       void mainImage(in vec2 fragCoord) {
           vec2 pix = fragCoord;
           vec3 col = texture(iChannel0, floor(pix / 8.0) * 8.0 / iResolution).rgb;
-          float gray = 0.3 * col.r + 0.59 * col.g + 0.11 * col.b;
-          int n = 4096;
-          if (gray > 0.2) n = 65600;
-          if (gray > 0.3) n = 163153;
-          if (gray > 0.4) n = 15255086;
-          if (gray > 0.5) n = 13121101;
-          if (gray > 0.6) n = 15252014;
-          if (gray > 0.7) n = 13195790;
-          if (gray > 0.8) n = 11512810;
+          float gray = 0.9 * col.r + 0.9 * col.g + 0.9 * col.b;
+          int n = 15255086;
+          //  if (gray > 0.2) n = 65600;
+          //  if (gray > 0.3) n = 163153;
+          //  if (gray > 0.4) n = 15255086;
+           if (gray > 0.5) n = 13121101;
+           if (gray > 0.6) n = 15252014;
+           if (gray > 0.7) n = 13195790;
+           if (gray > 0.8) n = 11512810;
           vec2 p = mod(pix / 4.0, 2.0) - vec2(1.0);
           col = col * character(n, p);
           fragColor = vec4(col, 1.0);
@@ -347,7 +224,7 @@
           mainImage(gl_FragCoord.xy);
       }
     `;
-
+    
     // Utility: compile shader
     function compileShader(gl, type, source) {
       const shader = gl.createShader(type);
@@ -360,7 +237,7 @@
       }
       return shader;
     }
-
+    
     // Utility: create program
     function createProgram(gl, vSource, fSource) {
       const vertexShader = compileShader(gl, gl.VERTEX_SHADER, vSource);
@@ -375,11 +252,11 @@
       }
       return program;
     }
-
+    
     // Create shader programs
     const program1 = createProgram(gl, vertexShaderSource, backgroundShaderSource);
     const program2 = createProgram(gl, vertexShaderSource, asciiShaderSource);
-
+    
     // Create full-screen quad buffer
     const quadVerts = new Float32Array([
       -1, -1,
@@ -394,11 +271,11 @@
     const vbo = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
-    // Both programs use the same attribute name "a_position"
     const posLoc1 = gl.getAttribLocation(program1, "a_position");
     gl.enableVertexAttribArray(posLoc1);
     gl.vertexAttribPointer(posLoc1, 2, gl.FLOAT, false, 0, 0);
-
+    // Both programs use the same attribute name
+    
     // Offscreen framebuffer for background shader
     const fbWidth = canvas.width;
     const fbHeight = canvas.height;
@@ -411,38 +288,34 @@
     gl.bindFramebuffer(gl.FRAMEBUFFER, offscreenFBO);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, offscreenTexture, 0);
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
+    
     // Get uniform locations for program1 (background)
     const iResolutionLoc1 = gl.getUniformLocation(program1, "iResolution");
     const iTimeLoc1 = gl.getUniformLocation(program1, "iTime");
-    const iMouseLoc1 = gl.getUniformLocation(program1, "iMouse"); // NEW: mouse uniform
-
+    const iMouseLoc1 = gl.getUniformLocation(program1, "iMouse");
+    
     // Get uniform locations for program2 (ASCII)
     const iResolutionLoc2 = gl.getUniformLocation(program2, "iResolution");
     const iTimeLoc2 = gl.getUniformLocation(program2, "iTime");
     const iChannel0Loc2 = gl.getUniformLocation(program2, "iChannel0");
-
+    
     // Render loop: two passes (background then ASCII overlay)
     function render(time) {
-      // Adjust time factor as needed
-      const t = time * 0.002;
-
-      // --- Pass 1: render background shader to offscreen framebuffer ---
+      const t = time * 0.0025;
+      
+      // Pass 1: render background shader to offscreen framebuffer
       gl.bindFramebuffer(gl.FRAMEBUFFER, offscreenFBO);
-      gl.viewport(0, 0, 1920, 1080);
+      gl.viewport(0, 0, fbWidth, fbHeight);
       gl.clearColor(0, 0, 0, 1);
       gl.clear(gl.COLOR_BUFFER_BIT);
       gl.useProgram(program1);
-      // Set a fixed resolution for the background shader if desired,
-      // or use the actual canvas size (here we use 1920x1080 as before)
-      gl.uniform2f(iResolutionLoc1, 1920, 1080);
+      gl.uniform2f(iResolutionLoc1, fbWidth, fbHeight);
       gl.uniform1f(iTimeLoc1, t);
-      // Pass in the current mouse position
-      gl.uniform2f(iMouseLoc1, mousePos.x, mousePos.y);
+      gl.uniform2f(iMouseLoc1, iMouse[0], iMouse[1]);
       gl.bindVertexArray(vao);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
-
-      // --- Pass 2: render ASCII shader to the default framebuffer using offscreen texture ---
+      
+      // Pass 2: render ASCII shader to the default framebuffer using offscreen texture
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.clearColor(0, 0, 0, 1);
@@ -455,7 +328,7 @@
       gl.uniform1i(iChannel0Loc2, 0);
       gl.bindVertexArray(vao);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
-
+      
       requestAnimationFrame(render);
     }
     requestAnimationFrame(render);
