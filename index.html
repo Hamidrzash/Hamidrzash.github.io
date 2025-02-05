@@ -10,7 +10,7 @@
       name="keywords"
       content="Hamid reza Shakeri, Flutter Developer, Portfolio, GitHub, LinkedIn"
     />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="author" content="Hamid reza Shakeri" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hamid reza Shakeri - Flutter Developer</title>
@@ -19,6 +19,7 @@
       rel="stylesheet"
     />
     <style>
+      /* Reset and base styles */
       * {
         margin: 0;
         padding: 0;
@@ -50,24 +51,32 @@
         padding: 1.5rem;
         max-width: 500px;
         width: 90%;
+        z-index: 1000;
       }
       .resume-container h1 {
-        font-size: 2rem;
+        font-size: 2.5rem;
         margin-bottom: 0.5rem;
       }
       .resume-container p {
         font-size: 1rem;
         margin-bottom: 1rem;
       }
+      .social-links {
+        position: relative;
+        z-index: 1001;
+      }
       .social-links a {
+        position: relative;
         color: #ffffff;
         text-decoration: none;
         margin: 0 0.5rem;
         font-size: 1.2rem;
-        transition: color 0.2s;
+        padding: 5px 10px;
+        transition: all 0.3s ease;
+        z-index: 1001;
       }
       .social-links a:hover {
-        color: #3d4dc2;
+        color: #000000;
       }
       @media (max-width: 480px) {
         .resume-container {
@@ -84,10 +93,38 @@
           margin: 0 0.3rem;
         }
       }
+      /* Cursor styles */
+      #cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 60px;
+  border: 2px solid #AAAAAA;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 999;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#cursor.link-hover {
+  width: 90px;
+  height: 90px;
+  background-color: rgba(255, 255, 255, 1);
+  border-color: transparent;
+}
     </style>
   </head>
   <body>
+    <!-- WebGL canvas -->
     <canvas id="glCanvas"></canvas>
+
+    <!-- Custom cursor -->
+    <div id="cursor"></div>
+
+    <!-- Resume container -->
     <div class="resume-container">
       <h1>Hamid reza Shakeri</h1>
       <p>Flutter developer with more than three years of experience</p>
@@ -96,7 +133,11 @@
         <a href="https://www.linkedin.com/in/hamidrezashakeri" target="_blank" rel="noopener">LinkedIn</a>
       </div>
     </div>
+
     <script>
+      /***********************
+       * WebGL Background Code
+       ***********************/
       const canvas = document.getElementById("glCanvas");
       const gl = canvas.getContext("webgl2");
       if (!gl) {
@@ -148,8 +189,8 @@
           vec3 lightBlue = vec3(61.0/255.0, 77.0/255.0, 194.0/255.0);
           float dist = length(fragCoord - iMouse.xy);
           float radius = 1.0;
-          float softness = 150.0;
-          float lightIntensity = smoothstep(radius + softness, radius - softness, dist) * 0.15;
+          float softness = 180.0;
+          float lightIntensity = smoothstep(radius + softness, radius - softness, dist) * 0.4;
           vec3 baseColor = mix(black, purple, pattern);
           vec3 finalColor = mix(baseColor, lightBlue, lightIntensity);
           fragColor = vec4(finalColor, 1.0);
@@ -308,6 +349,57 @@
         requestAnimationFrame(render);
       }
       requestAnimationFrame(render);
+
+      /**********************************
+       * Smooth White Circle Cursor Code
+/**********************************
+       * Smooth White Circle Cursor Code
+       **********************************/
+      const cursor = document.getElementById("cursor");
+      const links = document.querySelectorAll('.social-links a');
+
+      // Starting positions (centered)
+      let currentPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      let targetPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+      // Add hover effects for links
+      links.forEach(link => {
+        link.addEventListener('mouseenter', () => {
+          cursor.classList.add('link-hover');
+        });
+        
+        link.addEventListener('mouseleave', () => {
+          cursor.classList.remove('link-hover');
+        });
+      });
+
+      // Update the target position on mouse move
+      window.addEventListener("mousemove", (e) => {
+        targetPos.x = e.clientX;
+        targetPos.y = e.clientY;
+
+        // Update WebGL mouse position
+        iMouse = [e.clientX, canvas.height - e.clientY];
+      });
+
+      // Animation loop with smooth easing
+      function animateCursor() {
+        const ease = 0.1;
+        
+        // Smooth position updating
+        currentPos.x += (targetPos.x - currentPos.x) * ease;
+        currentPos.y += (targetPos.y - currentPos.y) * ease;
+        
+        // Calculate offset based on cursor state
+        const isHovered = cursor.classList.contains('link-hover');
+        const offset = isHovered ? 40 : 30; // 40px for hover state, 30px for normal
+        
+        cursor.style.transform = `translate(${currentPos.x - offset}px, ${currentPos.y - offset}px)`;
+        requestAnimationFrame(animateCursor);
+      }
+
+      // Start the cursor animation
+      animateCursor();
     </script>
   </body>
 </html>
