@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="description"
+      content="Hamid reza Shakeri - Flutter Developer with more than three years of experience. Find my portfolio and social links here."
+    />
+    <meta
+      name="keywords"
+      content="Hamid reza Shakeri, Flutter Developer, Portfolio, GitHub, LinkedIn"
+    />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="author" content="Hamid reza Shakeri" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hamid reza Shakeri - Flutter Developer</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* Reset and base styles */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+      body {
+        font-family: 'Montserrat', sans-serif;
+        color: #ffffff;
+      }
+      canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+      .resume-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        padding: 1.5rem;
+        max-width: 500px;
+        width: 90%;
+        z-index: 1000;
+      }
+      .resume-container h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+      }
+      .resume-container p {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+      }
+      .social-links {
+        position: relative;
+        z-index: 1001;
+      }
+      .social-links a {
+        position: relative;
+        color: #ffffff;
+        text-decoration: none;
+        margin: 0 0.5rem;
+        font-size: 1.2rem;
+        padding: 5px 10px;
+        transition: all 0.3s ease;
+        z-index: 1001;
+      }
+      .social-links a:hover {
+        color: #000000;
+      }
+      @media (max-width: 480px) {
+        .resume-container {
+          padding: 1rem;
+        }
+        .resume-container h1 {
+          font-size: 1.5rem;
+        }
+        .resume-container p {
+          font-size: 0.9rem;
+        }
+        .social-links a {
+          font-size: 1rem;
+          margin: 0 0.3rem;
+        }
+      }
+      /* Cursor styles */
+      #cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 60px;
+  height: 60px;
+  border: 2px solid #AAAAAA;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 999;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: difference;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#cursor.link-hover {
+  width: 90px;
+  height: 90px;
+  background-color: rgba(255, 255, 255, 1);
+  border-color: transparent;
+}
+    </style>
+  </head>
+  <body>
+    <!-- WebGL canvas -->
+    <canvas id="glCanvas"></canvas>
+
+    <!-- Custom cursor -->
+    <div id="cursor"></div>
+
+    <!-- Resume container -->
+    <div class="resume-container">
+      <h1>Hamid reza Shakeri</h1>
+      <p>Flutter developer with more than three years of experience</p>
+      <div class="social-links">
+        <a href="https://github.com/Hamidrzash" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/hamidrezashakeri" target="_blank" rel="noopener">LinkedIn</a>
+      </div>
+    </div>
+
+    <script>
+      /***********************
+       * WebGL Background Code
+       ***********************/
+      const canvas = document.getElementById("glCanvas");
+      const gl = canvas.getContext("webgl2");
+      if (!gl) {
+        alert("WebGL2 is not supported on your browser.");
+      }
+
+      function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      let iMouse = [canvas.width / 2, canvas.height / 2];
+      window.addEventListener("mousemove", (e) => {
+        iMouse = [e.clientX, canvas.height - e.clientY];
+      });
+
+      const vertexShaderSource = `#version 300 es
+        precision highp float;
+        in vec2 a_position;
+        out vec2 v_uv;
+        void main() {
+          v_uv = a_position * 0.5 + 0.5;
+          gl_Position = vec4(a_position, 0.0, 1.0);
+        }
+      `;
+
+      const backgroundShaderSource = `#version 300 es
+        precision highp float;
+        uniform float iTime;
+        uniform vec2 iResolution;
+        uniform vec2 iMouse;
+        out vec4 fragColor;
+        
+        #define time iTime
+        
+        void mainImage(out vec4 fragColor, in vec2 fragCoord) {   
+          float speed = 0.1;
+          float scale = 0.002;
+          vec2 p = fragCoord * scale;
+          for (int i = 1; i < 10; i++) {
+            p.x += 0.3 / float(i) * sin(float(i) * 3.0 * p.y + iTime * speed) + 650.0 / 9000.0;
+            p.y += 0.3 / float(i) * cos(float(i) * 3.0 * p.x + iTime * speed) + 650.0 / 9000.0;
+          }
+          float pattern = (sin(p.x + p.y) + cos(p.x + p.y)) * 0.5 + 0.5;
+          vec3 purple = vec3(61.0/255.0, 77.0/255.0, 194.0/255.0);
+          vec3 black = vec3(19.0/255.0, 18.0/255.0, 44.0/255.0);
+          vec3 lightBlue = vec3(61.0/255.0, 77.0/255.0, 194.0/255.0);
+          float dist = length(fragCoord - iMouse.xy);
+          float radius = 1.0;
+          float softness = 180.0;
+          float lightIntensity = smoothstep(radius + softness, radius - softness, dist) * 0.4;
+          vec3 baseColor = mix(black, purple, pattern);
+          vec3 finalColor = mix(baseColor, lightBlue, lightIntensity);
+          fragColor = vec4(finalColor, 1.0);
+        }
+        
+        void main() {
+          mainImage(fragColor, gl_FragCoord.xy);
+        }
+      `;
+
+      const asciiShaderSource = `#version 300 es
+        precision highp float;
+        uniform float iTime;
+        uniform vec2 iResolution;
+        uniform sampler2D iChannel0;
+        out vec4 fragColor;
+        
+        float character(int n, vec2 p) {
+          p = floor(p * vec2(-4.0, 4.0) + 2.5);
+          if (clamp(p.x, 0.0, 4.0) == p.x) {
+            if (clamp(p.y, 0.0, 4.0) == p.y) {
+              int a = int(round(p.x) + 5.0 * round(p.y));
+              if (mod(float(n) / exp2(float(a)), 2.0) > 0.9) return 1.0;
+            }
+          }
+          return 0.0;
+        }
+        
+        void mainImage(in vec2 fragCoord) {
+          vec2 pix = fragCoord;
+          vec3 col = texture(iChannel0, floor(pix / 8.0) * 8.0 / iResolution).rgb;
+          float gray = 0.9 * col.r + 0.9 * col.g + 0.9 * col.b;
+          int n = 15255086;
+          if (gray > 0.5) n = 13121101;
+          if (gray > 0.6) n = 15252014;
+          if (gray > 0.7) n = 13195790;
+          if (gray > 0.8) n = 11512810;
+          vec2 p = mod(pix / 4.0, 2.0) - vec2(1.0);
+          col = col * character(n, p);
+          fragColor = vec4(col, 1.0);
+        }
+        
+        void main() {
+          mainImage(gl_FragCoord.xy);
+        }
+      `;
+
+      function compileShader(gl, type, source) {
+        const shader = gl.createShader(type);
+        gl.shaderSource(shader, source);
+        gl.compileShader(shader);
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          console.error("Shader compile failed:", gl.getShaderInfoLog(shader));
+          gl.deleteShader(shader);
+          return null;
+        }
+        return shader;
+      }
+
+      function createProgram(gl, vSource, fSource) {
+        const vertexShader = compileShader(gl, gl.VERTEX_SHADER, vSource);
+        const fragmentShader = compileShader(gl, gl.FRAGMENT_SHADER, fSource);
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+          console.error("Program link failed:", gl.getProgramInfoLog(program));
+          return null;
+        }
+        return program;
+      }
+
+      const program1 = createProgram(gl, vertexShaderSource, backgroundShaderSource);
+      const program2 = createProgram(gl, vertexShaderSource, asciiShaderSource);
+
+      const quadVerts = new Float32Array([
+        -1, -1,
+         1, -1,
+        -1,  1,
+        -1,  1,
+         1, -1,
+         1,  1
+      ]);
+      const vao = gl.createVertexArray();
+      gl.bindVertexArray(vao);
+      const vbo = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
+      gl.bufferData(gl.ARRAY_BUFFER, quadVerts, gl.STATIC_DRAW);
+      const posLoc1 = gl.getAttribLocation(program1, "a_position");
+      gl.enableVertexAttribArray(posLoc1);
+      gl.vertexAttribPointer(posLoc1, 2, gl.FLOAT, false, 0, 0);
+
+      const fbWidth = canvas.width;
+      const fbHeight = canvas.height;
+      const offscreenTexture = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, offscreenTexture);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        fbWidth,
+        fbHeight,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        null
+      );
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      const offscreenFBO = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, offscreenFBO);
+      gl.framebufferTexture2D(
+        gl.FRAMEBUFFER,
+        gl.COLOR_ATTACHMENT0,
+        gl.TEXTURE_2D,
+        offscreenTexture,
+        0
+      );
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+      const iResolutionLoc1 = gl.getUniformLocation(program1, "iResolution");
+      const iTimeLoc1 = gl.getUniformLocation(program1, "iTime");
+      const iMouseLoc1 = gl.getUniformLocation(program1, "iMouse");
+      const iResolutionLoc2 = gl.getUniformLocation(program2, "iResolution");
+      const iTimeLoc2 = gl.getUniformLocation(program2, "iTime");
+      const iChannel0Loc2 = gl.getUniformLocation(program2, "iChannel0");
+
+      function render(time) {
+        const t = time * 0.0025;
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, offscreenFBO);
+        gl.viewport(0, 0, fbWidth, fbHeight);
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.useProgram(program1);
+        gl.uniform2f(iResolutionLoc1, fbWidth, fbHeight);
+        gl.uniform1f(iTimeLoc1, t);
+        gl.uniform2f(iMouseLoc1, iMouse[0], iMouse[1]);
+        gl.bindVertexArray(vao);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.clearColor(0, 0, 0, 1);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.useProgram(program2);
+        gl.uniform2f(iResolutionLoc2, canvas.width, canvas.height);
+        gl.uniform1f(iTimeLoc2, t);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, offscreenTexture);
+        gl.uniform1i(iChannel0Loc2, 0);
+        gl.bindVertexArray(vao);
+        gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+        requestAnimationFrame(render);
+      }
+      requestAnimationFrame(render);
+
+      /**********************************
+       * Smooth White Circle Cursor Code
+/**********************************
+       * Smooth White Circle Cursor Code
+       **********************************/
+      const cursor = document.getElementById("cursor");
+      const links = document.querySelectorAll('.social-links a');
+
+      // Starting positions (centered)
+      let currentPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+      let targetPos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+      // Add hover effects for links
+      links.forEach(link => {
+        link.addEventListener('mouseenter', () => {
+          cursor.classList.add('link-hover');
+        });
+        
+        link.addEventListener('mouseleave', () => {
+          cursor.classList.remove('link-hover');
+        });
+      });
+
+      // Update the target position on mouse move
+      window.addEventListener("mousemove", (e) => {
+        targetPos.x = e.clientX;
+        targetPos.y = e.clientY;
+
+        // Update WebGL mouse position
+        iMouse = [e.clientX, canvas.height - e.clientY];
+      });
+
+      // Animation loop with smooth easing
+      function animateCursor() {
+        const ease = 0.1;
+        
+        // Smooth position updating
+        currentPos.x += (targetPos.x - currentPos.x) * ease;
+        currentPos.y += (targetPos.y - currentPos.y) * ease;
+        
+        // Calculate offset based on cursor state
+        const isHovered = cursor.classList.contains('link-hover');
+        const offset = isHovered ? 40 : 30; // 40px for hover state, 30px for normal
+        
+        cursor.style.transform = `translate(${currentPos.x - offset}px, ${currentPos.y - offset}px)`;
+        requestAnimationFrame(animateCursor);
+      }
+
+      // Start the cursor animation
+      animateCursor();
+    </script>
+  </body>
+</html>
